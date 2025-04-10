@@ -19,19 +19,19 @@ export default function HomeScreen() {
       if (activeRole === 'booking_officer') {
         router.replace('../../../');
       } else if (activeRole === 'producer') {
-        router.replace('/producer/dashboard');
+        router.replace('../../screens/producer/ProducerDashboard');
       } else {
-        router.replace('/operator/dashboard');
+        router.replace('../../screens/operator/OperatorDashboard');
       }
     }
   }, [userProfile, loading, activeRole]);
 
   const handleLogin = () => {
-    router.push('/auth/login');
+    router.push('../../screens/auth/LoginScreen');
   };
 
   const handleRegister = () => {
-    router.push('/auth/register');
+    router.push('../../screens/auth/RegisterScreen');
   };
 
   return (

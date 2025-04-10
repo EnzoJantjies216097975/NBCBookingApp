@@ -1,74 +1,123 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useContext } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { AuthContext } from '../../contexts/AuthContext';
+import { RoleContext } from '../../contexts/RoleContext';
+import { HelloWave } from '@/components/HelloWave';
 
 export default function HomeScreen() {
+  const { userProfile, loading } = useContext(AuthContext);
+  const { activeRole, setActiveRole } = useContext(RoleContext);
+
+  // If user is authenticated, redirect to appropriate dashboard based on role
+  useEffect(() => {
+    if (!loading && userProfile && activeRole) {
+      if (activeRole === 'booking_officer') {
+        router.replace('../../../');
+      } else if (activeRole === 'producer') {
+        router.replace('/producer/dashboard');
+      } else {
+        router.replace('/operator/dashboard');
+      }
+    }
+  }, [userProfile, loading, activeRole]);
+
+  const handleLogin = () => {
+    router.push('/auth/login');
+  };
+
+  const handleRegister = () => {
+    router.push('/auth/register');
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+    <ThemedView style={styles.container}>
+      <View style={styles.header}>
+        <ThemedText type="title">TV Production Booking</ThemedText>
         <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+      </View>
+
+      <ThemedView style={styles.content}>
+        <ThemedText style={styles.subtitle}>
+          Streamline your production scheduling and staff management
         </ThemedText>
+
+        {!userProfile ? (
+          <View style={styles.authButtons}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Icon name="login" size={20} color="#fff" />
+              <Text style={styles.buttonText}>Sign In</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+              <Icon name="person-add" size={20} color="#fff" />
+              <Text style={styles.buttonText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.loadingContainer}>
+            <ThemedText>Loading your dashboard...</ThemedText>
+          </View>
+        )}
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 24,
+    paddingTop: 80,
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  content: {
+    flex: 1,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  subtitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+  authButtons: {
+    width: '100%',
+    gap: 16,
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  registerButton: {
+    backgroundColor: '#28a745',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    padding: 20,
   },
 });
